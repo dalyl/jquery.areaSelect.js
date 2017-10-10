@@ -3,7 +3,7 @@
  *
  * Updated by gongshw on 16/7/30.
  *
- * Updated by gongshw on 17/10/10.
+ * Updated by daly on 17/10/10.
  */
 (function ($, undefined) {
 	
