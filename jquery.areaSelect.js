@@ -2,12 +2,12 @@
  * Created by gongshw on 14/12/9.
  *
  * Updated by gongshw on 16/7/30.
- *
- * Updated by daly on 17/10/10.
+ * 
+ * Updated by daly on 17/10/11.
  */
 (function ($, undefined) {
 	
-		console.log('jquery.areaSelect.js by Gongshw https://github.com/gongshw/jquery.areaSelect.js');
+		console.log('jquery.areaSelect.js by daly https://github.com/dalyl/jquery.areaSelect.js');
 	
 		var AreaSelectStatus = {CREATE: 'create', MOVE: 'move', RESIZE: 'resize', NEAR: 'near'};
 		var Direction = {
@@ -36,6 +36,18 @@
 			return this.areas;
 		};
 
+		AreaSelect.prototype.getData = function () {
+			var data=[];
+			var areas= this.areas;
+			for(var i=0;i<areas.length;i++){
+				var area=areas[i];
+				var _data=this.areaData[i];
+				var item={x:area.x,y:area.y,width:area.width,height:area.height,data:_data};
+				data.push(item);
+			}
+			return data;
+		};
+
 		AreaSelect.prototype.getCurrent = function () {
 			return this.currentArea;
 		};
@@ -46,6 +58,14 @@
 			var data=index==-1?null: this.areaData[index];
 			if(typeof(this.OnSelect)==="function")	 this.OnSelect(area,data)
 		};
+
+		AreaSelect.prototype.getAreaData = function (args) {
+			var x=args[0].x;
+			var y=args[0].y;
+			var area=  this.getArea(x, y, this.options.padding);
+			var index = this.areas.indexOf(area);
+			return	index==-1?null: this.areaData[index];
+		}			
 
 		AreaSelect.prototype.setAreaData = function (args) {
 			var x=args[0].x;
