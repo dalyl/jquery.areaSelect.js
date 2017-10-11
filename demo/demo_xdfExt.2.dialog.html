@@ -1,0 +1,163 @@
+<html>
+    <head>
+        <title>热区编辑</title>
+        <meta http-equiv="Content-Type" content="text/html;charset=utf-8">
+        <style>
+            #imageFrame{
+                vertical-align:  top;
+                background: url(edit_bg.gif) repeat scroll 0 0 transparent; 
+            }
+    
+            #imageSet{
+                text-align: center;
+                background-color: #AFAB6B;
+                vertical-align:  top;
+            }
+            #imageSet fieldset span{
+                text-align: right;
+                padding-right: 3px;
+                width:50px;
+                display:-moz-inline-box; /* css注释：for ff2 */ 
+                display:inline-block; 
+            }
+    
+            #imageSet button{
+                margin: 10px;
+                text-align: center;
+            }
+    
+            #imagePreview{
+                vertical-align:  top; 
+                background-color:#c0c0c0 ;
+            }
+    
+            #imagePreview img {   opacity:1;  filter(alpha=100) }
+            #imagePreview img:hover { cursor: pointer; opacity:0.8;  filter(alpha=80) }
+            #imagePreview div{
+                display: inline-block;
+                overflow:hidden;
+                margin:2px;
+            }
+    
+            #imageList { 
+                text-align: left;
+                background-color:#c0c0c0 ;
+                vertical-align:  top; 
+            }
+    
+            #imageList img { opacity:1;  filter(alpha=100) }
+            #imageList img:hover { cursor: pointer; opacity:0.8;  filter(alpha=80) }
+    
+            #imageList div{
+                overflow-x:none;
+                overflow-y: scroll;
+            }
+    
+            #imageList ul{
+                list-style: none;
+                margin: 0px;
+                padding: 0px;
+            }
+    
+            #imageList ul li{
+                list-style: none;
+                padding-right:2px; 
+            }
+            
+        </style>
+    </head>
+    <body>
+        <table id="ctrlPanel">
+            <tr>
+                <td  id="imageList">
+                    <div>
+                        <ul >
+                                <li><img src="saber.jpg"   ></li>
+                                <li><img src="saber.jpg"   ></li>
+                        </ul>
+                    </div>
+                </td>
+                <td id="imageFrame"></td>
+                <td id="imagePreview">   </td>
+                <td id="imageSet">
+                    <fieldset>
+                        <legend>坐标微调</legend>
+                        <div><span>起点x</span><input type=" text" id="_current_area_x" /></div>
+                        <div><span>起点y</span><input type=" text"  id="_current_area_y" /></div>
+                        <div><span>宽</span><input type=" text" id="_current_area_w"  /></div>
+                        <div><span>高</span><input type=" text" id="_current_area_h"  /></div>
+                        <div><span>链接</span><input type=" text" id="_current_area_link" /></div>
+                    </fieldset>
+                    <button id="save">全部保存</button>
+                </td>
+            </tr>
+        </table>
+
+        <script src="../lib/jquery-1.11.1.js"></script>
+        <script src="../jquery.areaSelect.js"></script>
+        <script src="../jquery.areaSelect.xdfExt.js"> </script>
+        <script>
+    
+        $(function(){
+            var ctrl={
+                width:990,
+                height:624,
+                left_width:200,
+                right_width:320,
+                pre_width:100,
+            }
+    
+            var options = {
+                    $cavnasCtrl:$("#imageFrame"),
+                    $partialCtrl:$("#imagePreview"),
+                    $dataBindCtrl:{
+                        x:$("#_current_area_x"),
+                        y:$("#_current_area_y"),
+                        width:$("#_current_area_w"),
+                        height:$("#_current_area_h"),
+                        link:$("#_current_area_link"),
+                    },
+                    cavnasWidth:ctrl.width,
+                    cavnasHeight:ctrl.height,
+                    areaData: [
+                        {"x": 280, "y": 93, "width": 50, "height": 50,"link":""},
+                        {"x": 309, "y": 195, "width": 183, "height": 386,"link":""},
+                        {"x": 298, "y": 5, "width": 45, "height": 55,"link":""}],
+            };
+           
+    
+            $("#imageFrame").height(ctrl.height);
+            $("#imageFrame").width(ctrl.width);
+            $("#ctrlPanel").width(ctrl.width+ctrl.left_width+ctrl.right_width+ctrl.pre_width);
+            $("#imageSet").width(ctrl.right_width);
+            $("#imageList").width(ctrl.left_width);
+            $("#imagePreview").width(ctrl.pre_width);
+            $("#imageList").find("img").each(function(){
+                var the=this;
+                the.width=ctrl.left_width-5;
+                $(the).imgSelect(options);
+            });
+
+            $("#save").click(function(){
+                var data=[];
+                $("#imageList").find("img").each(function(){
+                    var item= $(this).imgSelect("get");
+                    data.push(item);
+                });
+                var str = JSON.stringify(data);  
+                alert(str);
+            });
+
+        })
+            
+    
+        </script>
+    </body>
+    
+    </html>
+    
+    
+     
+    
+    
+     
