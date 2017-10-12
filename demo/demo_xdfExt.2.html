@@ -3,6 +3,11 @@
         <title>热区编辑</title>
         <meta http-equiv="Content-Type" content="text/html;charset=utf-8">
     </head>
+    <style>
+        .dialog{
+            display:none; position:fixed;top:0; z-index:1000; overflow:hidden;width:100%;height:100%;  background:#c0c0c0 ;padding:3px
+        }
+    </style>
     <body>
         <div>
             <img src="saber.jpg" >
@@ -11,17 +16,50 @@
         <button id="edit">热区设置</button>
         <button id="preview">热区预览</button>
         <hr >
-        
-        <textarea style="width:100%;height:300px; " disabled="disabled" >
-
+        <textarea style="width:100%;height:300px; " disabled="disabled"  id="hotSets" >
+                
         </textarea>
-       
+        <div class="dialog" id="editDialog">
+            <div>
+                <button class="close">关闭</button>
+            </div>
+            <iframe frameborder="no" border="0" marginwidth="0" marginheight="0"  name="editDialogFrame"
+             src="demo_xdfExt.2.edit.html?src=saber.jpg"  scrolling="no"  width="100%" height="100%"></iframe>
+        </div>
+
+        <div class="dialog" id="previewDialog">
+            <div>
+                        <button class="close">关闭</button>
+            </div>
+            <iframe frameborder="no" border="0" marginwidth="0" marginheight="0"  name="prevewDialogFrame"
+             src="demo_xdfExt.2.preview.html?src=saber.jpg"  scrolling="no"  width="100%" height="100%"></iframe>
+        </div>
+            
         <script src="../lib/jquery-1.11.1.js"></script>
-        <script src="../jquery.areaSelect.js"></script>
-        <script src="../jquery.areaSelect.xdfExt.js"> </script>
+
         <script>
         $(function(){
-            
+            $("#edit").click(function(){
+               $("#editDialog").css("display","block");
+            })
+
+            $("#preview").click(function(){
+                $("#previewDialog").css("display","block");
+                var content=$("#hotSets").val();
+                if($.trim(content) == '') return;
+                var obj=JSON.parse(content);  
+                var Options = {
+                    baseWidth:obj.width,
+                    baseHeight:obj.height,
+                    areasData:obj.data,
+                };
+                window.frames["prevewDialogFrame"].setPreview(Options);  
+            })
+
+            $(".close").click(function(){
+               var parent=$(this).parents(".dialog");
+               $(parent).css("display","none");
+            });
         })
         </script>
     </body>

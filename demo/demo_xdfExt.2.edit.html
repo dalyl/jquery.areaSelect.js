@@ -31,37 +31,12 @@
                 background-color:#c0c0c0 ;
             }
     
-            #imagePreview img {   opacity:1;  }
-            #imagePreview img:hover { cursor: pointer; opacity:0.8;  }
+            #imagePreview img { opacity:1;  }
+            #imagePreview img:hover { cursor: pointer; opacity:0.8; }
             #imagePreview div{
                 display: inline-block;
                 overflow:hidden;
                 margin:2px;
-            }
-    
-            #imageList { 
-                text-align: left;
-                background-color:#c0c0c0 ;
-                vertical-align:  top; 
-            }
-    
-            #imageList img { opacity:1;   }
-            #imageList img:hover { cursor: pointer; opacity:0.8; }
-    
-            #imageList div{
-                overflow-x:none;
-                overflow-y: scroll;
-            }
-    
-            #imageList ul{
-                list-style: none;
-                margin: 0px;
-                padding: 0px;
-            }
-    
-            #imageList ul li{
-                list-style: none;
-                padding-right:2px; 
             }
             
         </style>
@@ -69,24 +44,17 @@
     <body>
         <table id="ctrlPanel">
             <tr>
-                <td id="imageList">
-                    <div>
-                        <ul >
-                                <li><img src="saber.jpg"   ></li>
-                                <li><img src="saber.jpg"   ></li>
-                        </ul>
-                    </div>
-                </td>
                 <td id="imageFrame"></td>
-                <td id="imagePreview"></td>
+                <td id="imagePreview">   </td>
                 <td id="imageSet">
                     <fieldset>
                         <legend>坐标微调</legend>
-                        <div><span>起点x</span><input type=" text" id="_current_area_x" disabled="disabled" /></div>
-                        <div><span>起点y</span><input type=" text"  id="_current_area_y" disabled="disabled" /></div>
-                        <div><span>宽</span><input type=" text" id="_current_area_w"  disabled="disabled" /></div>
-                        <div><span>高</span><input type=" text" id="_current_area_h"  disabled="disabled" /></div>
+                        <div><span>起点x</span><input type=" text" id="_current_area_x"  disabled="disabled" /></div>
+                        <div><span>起点y</span><input type=" text"  id="_current_area_y"  disabled="disabled" /></div>
+                        <div><span>宽</span><input type=" text" id="_current_area_w"   disabled="disabled" /></div>
+                        <div><span>高</span><input type=" text" id="_current_area_h"   disabled="disabled" /></div>
                         <div><span>链接</span><input type=" text" id="_current_area_link" /></div>
+                        <div><span>提示</span><input type=" text" id="_current_area_alt" /></div>
                     </fieldset>
                     <button id="save">全部保存</button>
                 </td>
@@ -99,6 +67,7 @@
         <script>
     
         $(function(){
+            var src=getQueryString("src");
 
             var ctrl={
                 width:500,
@@ -108,69 +77,84 @@
                 pre_width:100,
             }
     
-            $("#imageFrame").height(ctrl.height);
-            $("#imageFrame").width(ctrl.width);
-            $("#imageSet").width(ctrl.right_width);
-            $("#imagePreview").width(ctrl.pre_width);
-            
-            $("#imageList").width(ctrl.left_width);
-            $("#imageList div").height(ctrl.height);
-            $("#imageList").find("img").each(function(){
-                var the=this;
-                the.width=ctrl.left_width-20;
-                var options = {
+            var options = {
                     $cavnasCtrl:$("#imageFrame"),
                     $partialCtrl:$("#imagePreview"),
                     cavnasWidth:ctrl.width,
                     cavnasHeight:ctrl.height,
-                    imageSrc: this.src,
+                    imageSrc:src,
+                    triggerMethod: "load",
                     areaData: [
-                        {"x": 280, "y": 93, "width": 50, "height": 50,"data":""},
-                        {"x": 309, "y": 195, "width": 183, "height": 386,"data":""},
-                        {"x": 298, "y": 5, "width": 45, "height": 55,"data":""}],
-                };
-                $(the).imgSelect(options);
-                $(the).imgSelect('bindAreaDataPreviewEvent', function (area, data) {
+                        {"x": 280, "y": 93, "width": 50, "height": 50,"link":""},
+                        {"x": 309, "y": 195, "width": 183, "height": 386,"link":""},
+                        {"x": 298, "y": 5, "width": 45, "height": 55,"link":""}],
+            };
+           
+    
+            $("#imageFrame").height(ctrl.height);
+            $("#imageFrame").width(ctrl.width);
+            $("#imageSet").width(ctrl.right_width);
+            $("#imageList").width(ctrl.left_width);
+            $("#imagePreview").width(ctrl.pre_width);
+
+            $("#imageFrame").imgSelect(options);
+            $("#imageFrame").imgSelect('bindAreaDataPreviewEvent', function (area, data) {
                     $("#_current_area_x").val(0);
                     $("#_current_area_y").val(0);
                     $("#_current_area_w").val(0);
                     $("#_current_area_h").val(0);
                     $("#_current_area_link").val("");
+                    $("#_current_area_alt").val("");
                     if(area){
                         $("#_current_area_x").val(area.x);
                         $("#_current_area_y").val(area.y);
                         $("#_current_area_w").val(area.width);
                         $("#_current_area_h").val(area.height);
-                        $("#_current_area_link").val(data);
-                        $("#_current_area_link").unbind("change");
-                        $("#_current_area_link").bind("change",function(){
+                    }
+                    if(data){
+                        $("#_current_area_link").val(data.link);
+                        $("#_current_area_alt").val(data.alt);
+                    }
+                    $("#_current_area_link").unbind("change");
+                    $("#_current_area_alt").unbind("change");
+                    $("#_current_area_link").bind("change",function(){
                             var x= $("#_current_area_x").val();
                             var y= $("#_current_area_y").val();
                             var w= $("#_current_area_w").val();
                             var h= $("#_current_area_h").val();
                             var link= $("#_current_area_link").val();
+                            var alt=$("#_current_area_alt").val();
                             var _area={x:x,y:y,width:w,height:h};
-                            $(the).imgSelect('setAreaData',_area,link);
-                        });
-                    }
+                            $("#imageFrame").imgSelect('setAreaData',_area,{link:link,alt:alt});
+                    });
+                    $("#_current_area_alt").bind("change",function(){
+                            var x= $("#_current_area_x").val();
+                            var y= $("#_current_area_y").val();
+                            var w= $("#_current_area_w").val();
+                            var h= $("#_current_area_h").val();
+                            var link= $("#_current_area_link").val();
+                            var alt=$("#_current_area_alt").val();
+                            var _area={x:x,y:y,width:w,height:h};
+                            $("#imageFrame").imgSelect('setAreaData',_area,{link:link,alt:alt});
+                    });
                 });
-            });
 
             $("#save").click(function(){
-                var data=[];
-                $("#imageList").find("img").each(function(){
-                    var item= $(this).imgSelect("get");
-                    data.push(item);
-                });
+                var data=  $("#imageFrame").imgSelect("get");
                 var str = JSON.stringify(data);  
-                alert(str);
+                $(window.parent.document).find("#hotSets").val(str);
             });
-
         })
-     
+            
+        function getQueryString(name) { 
+            var reg = new RegExp("(^|&)" + name + "=([^&]*)(&|$)", "i"); 
+            var r = window.location.search.substr(1).match(reg); 
+            if (r != null) return unescape(r[2]); return null; 
+         } 
         </script>
     </body>
-</html>
+    
+    </html>
     
     
      

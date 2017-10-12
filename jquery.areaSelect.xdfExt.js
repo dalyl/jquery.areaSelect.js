@@ -11,23 +11,24 @@
             this.$ele = $ele;
             this.options = options;
             this.$ImageEditCurrent=	undefined ;
+            this.OnAreaDataPreview= undefined ;
             this.CurrentWidth=options.cavnasWidth;
             this.CurrentHeight=options.cavnasHeight;
-            var size=getImgNaturalDimensions($ele[0]);
+            var size=getImgNaturalDimensionsBySrc(options.imageSrc);
             var sizeVate= size.width/size.height;    
             if(this.CurrentWidth/this.CurrentHeight<sizeVate&&size.width >this.CurrentWidth)
             {
-                 this.CurrentHeight = (1/sizeVate)*this.CurrentWidth;
+                 this.CurrentHeight =  Math.round((1/sizeVate)*this.CurrentWidth) ;
             }
             else if( size.height  > this.CurrentHeight)
             {
-                this.CurrentWidth= this.CurrentHeight*sizeVate ;
+                this.CurrentWidth= Math.round(this.CurrentHeight*sizeVate);
             }
         }
     
         ImageSelect.prototype.init = function () {
             var the=this;
-            the.$ImageEditCurrent=$("<img src=\""+the.$ele[0].src+"\" width=\""+ this.CurrentWidth+"px\"  height=\""+this.CurrentHeight+"px\"> ");
+            the.$ImageEditCurrent=$("<img src=\""+  the.options.imageSrc +"\" width=\""+ the.CurrentWidth+"px\"  height=\""+the.CurrentHeight+"px\"> ");
             var data = the.options.areaData;
             the.$ImageEditCurrent.load(function(){
                 var _this=this;
@@ -45,15 +46,10 @@
                 $(_this).areaSelect(options);
     
                 $(data).each(function(){ 
-                    var link=this.link;
-                    var datax=this.x;
-                    var datay=this.y;
-                    var dataw=this.width;
-                    var datah=this.height;
-                    var area={x:datax,y:datay,width:dataw,height:datah}
-                    the.$ImageEditCurrent.areaSelect('setAreaData',area,link);
+                    var area =ConverArea(the.CurrentWidth,the.CurrentHeight,the.options.baseWidth,the.options.baseHeight,this.x,this.y,this.width,this.height);
+                    the.$ImageEditCurrent.areaSelect('setAreaData',area,data);
                 });
-    
+
                 the.PreviewArea($(_this).areaSelect('get'));
     
                 $(_this).areaSelect('bindChangeEvent', function (event, data) {
@@ -66,26 +62,17 @@
             }); 
     
             the.options.$cavnasCtrl.append( the.$ImageEditCurrent );
-    
-            the.options.$dataBindCtrl.link.change(function(){
-                var x= the.options.$dataBindCtrl.x.val();
-                var y= the.options.$dataBindCtrl.y.val();
-                var w= the.options.$dataBindCtrl.width.val();
-                var h= the.options.$dataBindCtrl.height.val();
-                var link= the.options.$dataBindCtrl.link.val();
-                var area={x:x,y:y,width:w,height:h};
-                the.$ImageEditCurrent.areaSelect('setAreaData',area,link);
-                the.save();
-            });
         }
     
         ImageSelect.prototype.save = function () {
             var the=this;
             var data= the.$ImageEditCurrent.areaSelect('getData');
+            the.options.baseWidth=the.CurrentWidth;
+            the.options.baseHeight=the.CurrentHeight;
             the.options.areaData=[];
             $(data).each(function(){
                 var area=this;
-                var item={x:area.x,y:area.y,width:area.width,height:area.height,link:area.data};
+                var item={x:area.x,y:area.y,width:area.width,height:area.height,data:area.data};
                 the.options.areaData.push(item);
             });
             the.$ele.data('ImageSelect', the);
@@ -119,14 +106,13 @@
                     'width': size,
                 });
     
-                var $img = $('<img class="_Preview_" data-x="'+area.x+'" data-y="'+area.y+'"  data-w="'+area.width+'"  data-h="'+area.height+'"  >').css({
+                var $img = $('<img class="_Preview_" data-x="'+area.x+'" data-y="'+area.y+'"  data-w="'+area.width+'"  data-h="'+area.height+'" src="'+ the.options.imageSrc+'"  >').css({
                     width: Math.round(pre_width),
                     height: Math.round(pre_height),
                     marginLeft: Math.round(pre_left),
                     marginTop: Math.round(pre_top)
                 });
     
-                $img.attr("src", the.$ele[0].src);
                 $div.append($img);
                 $preview.append($div);
                 $img.bind("click",function(){
@@ -141,32 +127,48 @@
             }
             the.save();
         }
+
+        ImageSelect.prototype.bindAreaDataPreviewEvent = function (handle) {
+            this.OnAreaDataPreview = handle[0];
+        };
+        
+        ImageSelect.prototype.setAreaData = function (args) {
+			var x=args[0].x;
+			var y=args[0].y;
+            var data=args[1];
+            var the=this;		
+            var area={x:x,y:y};
+            the.$ImageEditCurrent.areaSelect('setAreaData',area,data);
+            the.save();
+		};
         
         ImageSelect.prototype.EditAreaData=function (area,data)
-         {
+        {
             var the=this;
-            the.options.$dataBindCtrl.x.val(0);
-            the.options.$dataBindCtrl.y.val(0);
-            the.options.$dataBindCtrl.width.val(0);
-            the.options.$dataBindCtrl.height.val(0);
-            the.options.$dataBindCtrl.link.val("");
-            if(area){
-                the.options.$dataBindCtrl.x.val(area.x);
-                the.options.$dataBindCtrl.y.val(area.y);
-                the.options.$dataBindCtrl.width.val(area.width);
-                the.options.$dataBindCtrl.height.val(area.height);
-                the.options.$dataBindCtrl.link.val(data);
-            }
+            this.OnAreaDataPreview (area,data);
         }
 
         ImageSelect.prototype.get= function () {
             var data= this.$ele.data('ImageSelect');
-            return {Name:this.$ele[0].src,data:data.options.areaData};
+            return {Name:data.options.imageSrc,width:data.CurrentWidth,height:data.CurrentHeight,data:data.options.areaData};
+        }
+        
+        function ConverArea(width,height,baseWidth,baseHeight,areaX,areaY,areaWidth,areaHeight)
+        {
+            var vate_w=width/baseWidth;
+            var vate_h=height/baseHeight;
+            var new_x=Math.round(areaX*vate_w);
+            var new_y=Math.round(areaY*vate_h);
+            var new_w=Math.round(areaWidth*vate_w);
+            var new_h=Math.round(areaHeight*vate_h);
+            return {x:new_x,y:new_y,width:new_w,height:new_h};
         }
     
         function getImgNaturalDimensions(img, callback) {
-            return {width:img.naturalWidth,height:img.naturalHeight} 
+            return {width:img.naturalWidth,height:img.naturalHeight}
             /*
+              return {width:img.naturalWidth,height:img.naturalHeight}
+
               var nWidth, nHeight
             if (img.naturalWidth) { // 现代浏览器
                 nWidth = img.naturalWidth
@@ -179,34 +181,45 @@
             return {width: nWidth,height:nHeight}  
             */
         }
-    
+
+        function getImgNaturalDimensionsBySrc(src)
+        {
+            var image = new Image()
+            image.src=src; 
+            return {width:image.width,height:image.height} 
+        }            
     
         $.fn.imgSelect = function (method) {
             var as;
             var defaultOptions = {
                 $cavnasCtrl:$("#imageFrame"),
                 $partialCtrl:$("#imagePreview"),
-                $dataBindCtrl:{
-                    x:$("#_current_area_x"),
-                    y:$("#_current_area_y"),
-                    width:$("#_current_area_w"),
-                    height:$("#_current_area_h"),
-                    link:$("#_current_area_link"),
-                },
                 cavnasWidth:800,
                 cavnasHeight:600,
                 preViewWidth:100,
+                imageSrc:"",
+                baseWidth:0,
+                baseHeight:0,
                 areaData: [],
                 triggerMethod: "click",
             };
             as = this.data('ImageSelect');
             if (as == undefined && (method === undefined || $.isPlainObject(method))) {
                 var options = $.extend({}, defaultOptions, method);
+                if(options.imageSrc==""){
+                    console.error('this image must not be null');
+                    return;
+                }
+                
                 as = new ImageSelect(this, options);
                 this.data('ImageSelect', as);
-                $(this).bind(options.triggerMethod,function(){
+                if(options.triggerMethod==="load"){
                     as.Select();
-                })
+                }else{
+                    $(this).bind(options.triggerMethod,function(){
+                        as.Select();
+                    })
+                }
             } else {
                 if (as == undefined) {
                     console.error('pls invoke imgSelect() on this element first!');

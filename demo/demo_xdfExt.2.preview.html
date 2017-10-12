@@ -1,0 +1,42 @@
+<html>
+    <head>
+        <title>热区效果预览</title>
+        <meta http-equiv="Content-Type" content="text/html;charset=utf-8">
+    </head>
+    <style>
+     
+    </style>
+    <body>
+        <div id="preview">
+
+        </div>
+        <script src="../lib/jquery-1.11.1.js"></script>
+        <script src="../jquery.imgHotMap.js"></script>
+        <script>
+
+        function setPreview(options){
+            $("#preview").empty();
+            var src=getQueryString("src");
+            var $img=$("<img src='"+src+"' data-baseWidth='"+options.baseWidth+"' data-baseHeight='"+options.baseHeight+"' data-areas='"+  JSON.stringify(options.areasData) +"' >");
+            $("#preview").append($img);
+            $img.load(function(){
+                $(this).imgHotMap(options);
+            })
+        }
+              
+        function getQueryString(name) { 
+            var reg = new RegExp("(^|&)" + name + "=([^&]*)(&|$)", "i"); 
+            var r = window.location.search.substr(1).match(reg); 
+            if (r != null) return unescape(r[2]); return null; 
+        } 
+
+        </script>
+    </body>
+    
+    </html>
+    
+    
+     
+    
+    
+     
